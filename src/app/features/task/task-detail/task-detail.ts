@@ -5,6 +5,7 @@ import { TaskService } from '../../../core/services/task.service';
 import { LocalStorageService } from '../../../core/services/local-storage.service';
 import { ProgressBarComponent } from '../../../shared/components/progress-bar/progress-bar';
 import { HeaderComponent } from '../../../shared/components/header/header';
+import { TaskFormComponent } from '../task-form/task-form';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe, DatePipe, CommonModule } from '@angular/common';
 import confetti from 'canvas-confetti';
@@ -20,6 +21,7 @@ import { ToastService } from '../../../core/services/toast.service';
     CommonModule,
     HeaderComponent,
     ProgressBarComponent,
+    TaskFormComponent,
     ToastContainerComponent
   ],
   template: `
@@ -136,6 +138,30 @@ import { ToastService } from '../../../core/services/toast.service';
                     <div class="space-y-2">
                       <input
                         type="number"
+                        [(ngModel)]="customDecrementValue"
+                        [disabled]="isLoading()"
+                        [max]="task()!.current_count - 1"
+                        min="0"
+                        placeholder="Decrementar a valor (ej: 5)"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                      />
+                      <button
+                        (click)="decrementToCustom()"
+                        [disabled]="!isValidCustomDecrement() || isLoading()"
+                        class="w-full flex items-center justify-center px-6 py-2 border border-transparent text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                      >
+                        @if (!isLoading()) {
+                          <span>↓</span>
+                        } @else {
+                          <span class="animate-spin">⟳</span>
+                        }
+                        <span class="ml-2">Decrementar a valor</span>
+                      </button>
+                    </div>
+
+                    <div class="space-y-2">
+                      <input
+                        type="number"
                         [(ngModel)]="customResetValue"
                         [disabled]="isLoading()"
                         min="0"
@@ -170,7 +196,7 @@ import { ToastService } from '../../../core/services/toast.service';
                     </button>
 
                     <button
-                      (click)="editTask()"
+                      (click)="openEditModal()"
                       class="flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
                     >
                       <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -192,6 +218,16 @@ import { ToastService } from '../../../core/services/toast.service';
           }
         </div>
       </main>
+      
+      <!-- Edit Task Modal -->
+      <app-task-form
+        [isOpen]="isEditModalOpen()"
+        [task]="task()"
+        [isLoading]="isLoading()"
+        (taskSaved)="onTaskUpdated($event)"
+        (cancelled)="closeEditModal()"
+      ></app-task-form>
+      
       <app-toast-container></app-toast-container>
     </div>
   `,
@@ -206,7 +242,9 @@ export class TaskDetailComponent implements OnInit {
 
   task = signal<Task | null>(null);
   isLoading = signal(false);
+  isEditModalOpen = signal(false);
   customResetValue: number | null = null;
+  customDecrementValue: number | null = null;
   private previousCount = 0;
 
   async ngOnInit() {
@@ -234,8 +272,21 @@ export class TaskDetailComponent implements OnInit {
     this.router.navigate(['/dashboard']);
   }
 
-  editTask() {
-    // TODO: Implement edit functionality
+  openEditModal() {
+    this.isEditModalOpen.set(true);
+  }
+
+  closeEditModal() {
+    this.isEditModalOpen.set(false);
+  }
+
+  async onTaskUpdated(updatedTask: Task) {
+    this.task.set(updatedTask);
+    this.closeEditModal();
+    this.toastService.showSuccess(
+      'Tarea actualizada',
+      `La tarea "${updatedTask.title}" se ha actualizado correctamente.`
+    );
   }
 
   async decrementTask() {
@@ -278,8 +329,65 @@ export class TaskDetailComponent implements OnInit {
       const updatedTask = await this.taskService.resetTask(currentTask.id, this.customResetValue);
       this.task.set(updatedTask);
       this.customResetValue = null;
+      this.toastService.showSuccess(
+        'Tarea restablecida',
+        `La tarea se ha restablecido al valor ${updatedTask.current_count}.`
+      );
     } catch (error) {
       console.error('Error resetting task to custom value:', error);
+      this.toastService.showError(
+        'Error',
+        'No se pudo restablecer la tarea. Inténtalo de nuevo.'
+      );
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  isValidCustomDecrement(): boolean {
+    const currentTask = this.task();
+    if (!currentTask || this.customDecrementValue === null || this.customDecrementValue === undefined) return false;
+
+    // Must be 0 or greater
+    if (this.customDecrementValue < 0) return false;
+
+    // Must be less than current count (to actually decrement)
+    if (this.customDecrementValue >= currentTask.current_count) return false;
+
+    return true;
+  }
+
+  async decrementToCustom() {
+    const currentTask = this.task();
+    if (!currentTask || !this.isValidCustomDecrement()) return;
+
+    this.isLoading.set(true);
+    try {
+      // Set current_count to the target value WITHOUT changing initial_count
+      const targetValue = this.customDecrementValue!;
+      const completed = targetValue === 0;
+
+      // Use updateTask to only change current_count, not initial_count
+      const updatedTask = await this.taskService.updateTask(currentTask.id, {
+        current_count: targetValue,
+        completed
+      });
+
+      this.task.set(updatedTask);
+      this.checkForCompletion(updatedTask);
+
+      this.toastService.showSuccess(
+        'Tarea actualizada',
+        `La tarea se ha establecido a ${updatedTask.current_count} de ${updatedTask.initial_count}.`
+      );
+
+      this.customDecrementValue = null;
+    } catch (error) {
+      console.error('Error decrementing task to custom value:', error);
+      this.toastService.showError(
+        'Error',
+        'No se pudo actualizar la tarea. Inténtalo de nuevo.'
+      );
     } finally {
       this.isLoading.set(false);
     }
