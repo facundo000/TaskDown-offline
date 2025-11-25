@@ -159,18 +159,23 @@ export class TaskFormComponent {
         });
       }
     });
+
+    // Effect to reset form when modal closes
+    effect(() => {
+      const isCurrentlyOpen = this.isOpen();
+      // When modal closes, reset the form for next time
+      if (!isCurrentlyOpen) {
+        this.taskForm.reset({
+          title: '',
+          description: '',
+          url: '',
+          initialCount: 1,
+        });
+      }
+    });
+
     // update limit state initially
     this.updateLimitState();
-  }
-
-  ngOnInit() {
-    // Initialize form when task changes
-    this.taskForm.patchValue({
-      title: this.task()?.title || '',
-      description: this.task()?.description || '',
-      url: this.task()?.url || '',
-      initialCount: this.task()?.initial_count || 1,
-    });
   }
 
   isCreatingNew(): boolean {
@@ -219,6 +224,13 @@ export class TaskFormComponent {
         }
 
         this.taskSaved.emit(savedTask);
+        // Reset form after successful save
+        this.taskForm.reset({
+          title: '',
+          description: '',
+          url: '',
+          initialCount: 1,
+        });
       } catch (error: any) {
         console.error('Error saving task:', error);
         const msg = error?.message || 'No se pudo guardar la tarea. Verifica los datos e inténtalo de nuevo.';

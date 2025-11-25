@@ -193,38 +193,7 @@ class TaskDownPopup {
     });
   }
 
-  async updateLocalLimitBanner(bannerEl) {
-    try {
-      const limit = await this.getLocalLimit();
-      const titleEl = bannerEl.querySelector('.banner-title');
-      const descEl = bannerEl.querySelector('.banner-description');
-      if (titleEl) titleEl.textContent = `Límite de ${limit} tareas sin autenticación`;
-      if (descEl) descEl.textContent = `Regístrate para crear tareas ilimitadas y sincronizar entre dispositivos`;
-    } catch (err) {
-      console.warn('Could not update local limit banner:', err);
-    }
-  }
 
-  // Enable/disable the add-task button depending on the configured limit
-  async updateAddButtonState() {
-    try {
-      const limit = await this.getLocalLimit();
-      const tasks = this.getLocalTasks();
-      const count = tasks ? tasks.length : 0;
-      if (this.addTaskBtn) {
-        this.addTaskBtn.disabled = count >= limit;
-      }
-      // If add-task form is open and now at limit, hide the form
-      if (this.addTaskFormEl && this.addTaskFormEl.classList && (this.addTaskFormEl.classList.contains('hidden') === false)) {
-        if (count >= limit) {
-          // Close the form to prevent creating more tasks
-          this.hideAddTaskForm();
-        }
-      }
-    } catch (err) {
-      console.warn('Could not update add button state:', err);
-    }
-  }
 
 
   setupEventListeners() {
@@ -305,7 +274,7 @@ class TaskDownPopup {
     // Allow passing tasks as parameter for updates from chrome.storage
     const tasks = tasksToRender || this.tasks;
 
-    // If no tasks, show empty state with option to add
+    // If no tasks, show empty state
     if (tasks.length === 0) {
       this.hideAll();
       if (this.tasksContainerEl) {
@@ -314,16 +283,6 @@ class TaskDownPopup {
       if (this.tasksListEl) {
         this.tasksListEl.innerHTML = '';
       }
-      // Show banner to encourage creating local task
-      let banner = document.getElementById('local-limit-banner');
-      if (!banner) {
-        banner = this.createLocalLimitBanner();
-        const tasksContainer = document.getElementById('tasks-container');
-        if (tasksContainer) {
-          tasksContainer.insertBefore(banner, tasksContainer.firstChild);
-        }
-      }
-      banner.classList.remove('hidden');
       return;
     }
 
@@ -349,19 +308,6 @@ class TaskDownPopup {
     if (this.tasksContainerEl) {
       this.tasksContainerEl.classList.remove('hidden');
     }
-
-    // Ensure banner exists for local mode
-    let banner = document.getElementById('local-limit-banner');
-    if (!banner) {
-      banner = this.createLocalLimitBanner();
-      if (this.tasksListEl) {
-        this.tasksListEl.parentElement.insertBefore(banner, this.tasksListEl);
-      }
-    }
-    banner.classList.remove('hidden');
-
-    // Update add button enabled/disabled state after rendering
-    try { this.updateAddButtonState().catch(() => { }); } catch (e) { }
   }
 
   createTaskElement(task) {
@@ -700,53 +646,8 @@ class TaskDownPopup {
       this.tasksContainerEl.classList.remove('hidden');
     }
 
-    // Show limit banner
-    let banner = document.getElementById('local-limit-banner');
-    if (!banner) {
-      banner = this.createLocalLimitBanner();
-      const tasksContainer = document.getElementById('tasks-container');
-      if (tasksContainer) {
-        tasksContainer.insertBefore(banner, tasksContainer.firstChild);
-      }
-    }
-    banner.classList.remove('hidden');
-
     // Load and render local tasks
     this.loadTasks();
-  }
-
-  createLocalLimitBanner() {
-    const banner = document.createElement('div');
-    banner.id = 'local-limit-banner';
-    banner.className = 'local-limit-banner';
-    banner.innerHTML = `
-      <div class="banner-content">
-        <div class="banner-info">
-          <div class="banner-icon">🔒</div>
-          <div class="banner-text">
-            <p class="banner-title">Límite de — tareas sin autenticación</p>
-            <p class="banner-description">Regístrate para crear tareas ilimitadas y sincronizar entre dispositivos</p>
-          </div>
-        </div>
-        <button id="banner-signup-btn" class="btn btn-primary banner-btn">
-          Registrarse
-        </button>
-      </div>
-    `;
-
-    // Add event listener
-    const signupBtn = banner.querySelector('#banner-signup-btn');
-    if (signupBtn) {
-      signupBtn.addEventListener('click', () => {
-        chrome.tabs.create({ url: 'https://your-taskdown-app.com/auth/register' });
-        window.close();
-      });
-    }
-
-    // Update banner text asynchronously with the configured limit
-    this.updateLocalLimitBanner(banner).catch(() => { });
-
-    return banner;
   }
 
   showTasksContainer() {

@@ -114,7 +114,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private localStorageService = inject(LocalStorageService);
   private toastService = inject(ToastService);
   private router = inject(Router);
-  
+
 
   tasks = signal<Task[]>([]);
   isTaskFormOpen = signal(false);
@@ -134,19 +134,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
       if (msg && msg.type === 'TASKDOWN_REQUEST_REFRESH') {
         console.log('📣 Received TASKDOWN_REQUEST_REFRESH from toast, reloading tasks in-page');
         this.loadTasks();
-          // Dismiss the extension reminder toast(s) that included the action button
-          try {
-            const currentToasts = this.toastService.toasts();
-            currentToasts.forEach(t => {
-              if (t.actionLabel === 'Refrescar ahora' || (t.title && t.title.includes('Cambios desde la extensión'))) {
-                this.toastService.dismissToast(t.id);
-              }
-            });
-          } catch (err) {
-            console.debug('Could not dismiss extension reminder toasts:', err);
-          }
+        // Dismiss the extension reminder toast(s) that included the action button
+        try {
+          const currentToasts = this.toastService.toasts();
+          currentToasts.forEach(t => {
+            if (t.actionLabel === 'Refrescar ahora' || (t.title && t.title.includes('Cambios desde la extensión'))) {
+              this.toastService.dismissToast(t.id);
+            }
+          });
+        } catch (err) {
+          console.debug('Could not dismiss extension reminder toasts:', err);
+        }
 
-          this.toastService.showSuccess('Actualizado', 'Se han cargado los cambios desde la extensión');
+        this.toastService.showSuccess('Actualizado', 'Se han cargado los cambios desde la extensión');
       }
     } catch (err) {
       console.error('Error handling TASKDOWN_REQUEST_REFRESH message:', err);
@@ -217,6 +217,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   async onTaskSaved(savedTask: Task) {
     this.closeTaskForm();
     await this.loadTasks(); // Reload tasks to show changes
+    this.updateLocalTasksCount(); // Update task counter
     this.toastService.showSuccess(
       'Tarea guardada',
       `La tarea "${savedTask.title}" se ha guardado correctamente.`
