@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskDown</title>
+  <link rel="stylesheet" href="./popup.css">
+</head>
+<body>
+  <div id="loading" class="screen">
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Cargando...</p>
+    </div>
+  </div>
+
+  <div id="auth-required" class="screen hidden">
+    <div class="auth-container">
+      <h2>¡Bienvenido a TaskDown!</h2>
+      <p>Inicia sesión para sincronizar tus tareas entre dispositivos.</p>
+      <div class="auth-buttons">
+        <button id="open-web-app" class="btn btn-primary">
+          Abrir aplicación web
+        </button>
+        <button id="use-local-mode" class="btn btn-secondary">
+          Crear tareas locales
+        </button>
+        <p class="auth-note">
+          O inicia sesión para sincronizar en la nube
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div id="local-tasks-info" class="screen hidden">
+    <div class="local-tasks-container">
+      <h2>Tareas locales encontradas</h2>
+      <p>
+        Tienes <span id="local-tasks-count">0</span> tareas creadas localmente.
+        Inicia sesión para sincronizarlas con la nube.
+      </p>
+      <div class="auth-buttons">
+        <button id="open-web-app-local" class="btn btn-primary">
+          Iniciar sesión
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tasks-container" class="screen hidden">
+    <div class="tasks-header">
+      <h2>Mis Tareas</h2>
+      <div class="header-actions">
+        <button id="add-task-btn" class="btn btn-primary" title="Nueva tarea">
+          +
+        </button>
+      </div>
+    </div>
+    <div id="tasks-list" class="tasks-list">
+      <!-- Tasks will be inserted here -->
+    </div>
+    <div class="tasks-footer">
+      <button id="open-dashboard" class="btn btn-secondary">
+        Ver todas las tareas
+      </button>
+    </div>
+  </div>
+
+  <div id="add-task-form" class="screen hidden">
+    <div class="form-header">
+      <h2>Nueva Tarea</h2>
+      <button id="cancel-add-btn" class="btn btn-secondary" title="Cancelar">
+        ✕
+      </button>
+    </div>
+    <form id="task-form" class="task-form">
+      <div class="form-group">
+        <label for="task-title">Título *</label>
+        <input type="text" id="task-title" required placeholder="Título de la tarea">
+      </div>
+      <div class="form-group">
+        <label for="task-description">Descripción</label>
+        <textarea id="task-description" placeholder="Descripción opcional"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="task-url">URL</label>
+        <input type="url" id="task-url" placeholder="https://ejemplo.com">
+      </div>
+      <div class="form-group">
+        <label for="task-count">Cantidad inicial *</label>
+        <input type="number" id="task-count" min="1" value="1" required>
+      </div>
+      <div class="form-actions">
+        <button type="button" id="cancel-form-btn" class="btn btn-secondary">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Crear Tarea</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="empty-state" class="screen hidden">
+    <div class="empty-container">
+      <div class="empty-icon">📝</div>
+      <h3>No hay tareas pendientes</h3>
+      <p>¡Felicitaciones! Has completado todas tus tareas.</p>
+    </div>
+  </div>
+
+  <div id="error-state" class="screen hidden">
+    <div class="error-container">
+      <div class="error-icon">⚠️</div>
+      <h3>Error al cargar tareas</h3>
+      <p id="error-message">Ha ocurrido un error inesperado.</p>
+      <button id="retry-btn" class="btn btn-primary">
+        Reintentar
+      </button>
+    </div>
+  </div>
+
+  <script src="./popup.js"></script>
+</body>
+</html>
