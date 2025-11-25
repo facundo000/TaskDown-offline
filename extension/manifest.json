@@ -8,9 +8,6 @@
     "activeTab",
     "contextMenus"
   ],
-  "host_permissions": [
-    "https://*.supabase.co/*"
-  ],
   "action": {
     "default_popup": "popup/popup.html",
     "default_title": "TaskDown - Gestiona tus tareas",
@@ -25,9 +22,15 @@
     "service_worker": "background.js"
   },
   "content_scripts": [
-    {      
-      "matches": ["http://localhost:4200/*", "http://127.0.0.1:4200/*"],
-      "js": ["content.js", "content.sync.js"],
+    {
+      "matches": [
+        "http://localhost:4200/*",
+        "http://127.0.0.1:4200/*"
+      ],
+      "js": [
+        "content.js",
+        "content.sync.js"
+      ],
       "run_at": "document_start"
     }
   ],

@@ -199,12 +199,12 @@ class TaskDownPopup {
   setupEventListeners() {
     // Auth buttons
     this.openWebAppBtn?.addEventListener('click', () => {
-      chrome.tabs.create({ url: 'https://your-taskdown-app.com' });
+      chrome.tabs.create({ url: EXTENSION_CONFIG.appUrl });
       window.close();
     });
 
     this.openWebAppLocalBtn?.addEventListener('click', () => {
-      chrome.tabs.create({ url: 'https://your-taskdown-app.com' });
+      chrome.tabs.create({ url: EXTENSION_CONFIG.appUrl });
       window.close();
     });
 
@@ -215,7 +215,7 @@ class TaskDownPopup {
 
     // Task management buttons
     this.openDashboardBtn?.addEventListener('click', () => {
-      chrome.tabs.create({ url: 'https://your-taskdown-app.com/dashboard' });
+      chrome.tabs.create({ url: `${EXTENSION_CONFIG.appUrl}/dashboard` });
       window.close();
     });
     this.retryBtn?.addEventListener('click', () => this.loadTasks());
@@ -379,7 +379,7 @@ class TaskDownPopup {
     const detailsBtn = taskDiv.querySelector('.details-btn');
     detailsBtn?.addEventListener('click', (e) => {
       e.stopPropagation();
-      chrome.tabs.create({ url: `https://your-taskdown-app.com/task/${task.id}` });
+      chrome.tabs.create({ url: `${EXTENSION_CONFIG.appUrl}/task/${task.id}` });
       window.close();
     });
 
