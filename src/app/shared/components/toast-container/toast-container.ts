@@ -53,12 +53,10 @@ export class ToastContainerComponent implements OnInit, OnDestroy {
   private _toastsEffectDisposer: EffectRef | null = null;
 
   ngOnInit() {
-    console.log('ToastContainerComponent initialized, current toasts:', this.toasts());
     // Debug: react to changes in the toasts signal and log them
     try {
       this._toastsEffectDisposer = effect(() => {
         const current = this.toasts();
-        console.log('ToastContainer: toasts signal changed, count=', current.length, current);
         // start progress tracking for any auto-dismiss toasts that appear after init
         current.forEach(toast => {
           if (toast.duration && !this.progressIntervals.has(toast.id)) {
@@ -67,7 +65,6 @@ export class ToastContainerComponent implements OnInit, OnDestroy {
         });
       });
     } catch (err) {
-      console.debug('Could not create effect for toasts debugging:', err);
     }
     // Start progress tracking for auto-dismissing toasts
     this.toasts().forEach(toast => {

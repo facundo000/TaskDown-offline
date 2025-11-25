@@ -1,16 +1,12 @@
 // TaskDown Browser Extension Popup
 // Handles authentication, task listing, and decrement functionality
 
-console.log('popup.js script loaded');
 
 class TaskDownPopup {
   constructor() {
-    console.log('TaskDownPopup constructor called');
     this.tasks = [];
 
     // Wait for DOM to be fully ready
-    console.log('Document ready state:', document.readyState);
-    console.log('Document body:', !!document.body);
 
     // DOM elements - with null checks
     this.loadingEl = document.getElementById('loading');
@@ -22,22 +18,13 @@ class TaskDownPopup {
     this.errorStateEl = document.getElementById('error-state');
     this.addTaskFormEl = document.getElementById('add-task-form');
 
-    console.log('DOM elements found:', {
-      loading: !!this.loadingEl,
-      authRequired: !!this.authRequiredEl,
-      tasksContainer: !!this.tasksContainerEl,
-      addTaskForm: !!this.addTaskFormEl
-    });
 
     // Detailed logging for debugging
     if (this.authRequiredEl) {
-      console.log('authRequiredEl found:', this.authRequiredEl.id);
     } else {
       console.error('authRequiredEl NOT found - checking DOM...');
       const allScreens = document.querySelectorAll('.screen');
-      console.log('All screen elements found:', allScreens.length);
       allScreens.forEach((el, idx) => {
-        console.log(`  Screen ${idx}:`, el.id, el.className);
       });
     }
 
@@ -62,7 +49,6 @@ class TaskDownPopup {
   }
 
   async init() {
-    console.log('TaskDownPopup init() called');
 
     try {
       chrome.storage.onChanged.addListener((changes, areaName) => {
@@ -70,7 +56,6 @@ class TaskDownPopup {
         // or under 'tasks' (array). Handle both and update popup accordingly.
         const key = changes['taskdown_local_tasks'] ? 'taskdown_local_tasks' : (changes['tasks'] ? 'tasks' : null);
         if ((areaName === 'sync' || areaName === 'local') && key) {
-          console.log('🔄 Detected changes in chrome.storage from web (key):', key);
           try {
             const newValue = changes[key].newValue;
             // If value is a string (JSON), parse it; if it's an array/object, use directly
@@ -92,11 +77,9 @@ class TaskDownPopup {
             try {
               localStorage.setItem('taskdown_local_tasks', JSON.stringify(tasksArray));
             } catch (err) {
-              console.warn('Could not write to popup localStorage:', err);
             }
 
             this.renderTasks(tasksArray || []);
-            console.log('✓ Popup tasks updated from chrome.storage change');
           } catch (error) {
             console.error('Error handling chrome.storage.onChanged update:', error);
           }
@@ -111,7 +94,6 @@ class TaskDownPopup {
         try {
           const raw = result && result.taskdown_local_tasks;
           if (raw) {
-            console.log('📥 Cargando tareas desde chrome.storage.sync (taskdown_local_tasks)');
             let tasks = [];
             if (typeof raw === 'string') {
               tasks = JSON.parse(raw || '[]');
@@ -121,15 +103,12 @@ class TaskDownPopup {
             this.tasks = tasks || [];
             try {
               localStorage.setItem('taskdown_local_tasks', JSON.stringify(this.tasks));
-              console.log('✓ Popup localStorage updated from chrome.storage.sync');
             } catch (err) {
-              console.warn('Could not write popup localStorage:', err);
             }
             this.renderTasks();
             return;
           }
         } catch (err) {
-          console.warn('Error parsing tasks from chrome.storage.sync:', err);
         }
 
         // Fallback to chrome.storage.local
@@ -137,7 +116,6 @@ class TaskDownPopup {
           try {
             const rawLocal = localRes && localRes.taskdown_local_tasks;
             if (rawLocal) {
-              console.log('📥 Cargando tareas desde chrome.storage.local (fallback)');
               let tasks = [];
               if (typeof rawLocal === 'string') {
                 tasks = JSON.parse(rawLocal || '[]');
@@ -147,15 +125,12 @@ class TaskDownPopup {
               this.tasks = tasks || [];
               try {
                 localStorage.setItem('taskdown_local_tasks', JSON.stringify(this.tasks));
-                console.log('✓ Popup localStorage updated from chrome.storage.local');
               } catch (err) {
-                console.warn('Could not write popup localStorage (local fallback):', err);
               }
               this.renderTasks();
               return;
             }
           } catch (err) {
-            console.warn('Error parsing tasks from chrome.storage.local:', err);
           }
 
           // If no tasks found, render current this.tasks (likely empty)
@@ -165,7 +140,6 @@ class TaskDownPopup {
 
       // Load tasks and render
       this.loadTasks();
-      console.log('Popup initialization completed successfully');
     } catch (error) {
       console.error('Failed to initialize popup:', error);
       this.showError('Error al inicializar la extensión: ' + error.message);
@@ -182,12 +156,10 @@ class TaskDownPopup {
             if (typeof v === 'number' && isFinite(v) && v > 0) return resolve(v);
             return resolve(20);
           } catch (err) {
-            console.warn('Error reading local limit from storage:', err);
             resolve(20);
           }
         });
       } catch (err) {
-        console.warn('chrome.storage.sync not available, falling back to default:', err);
         resolve(20);
       }
     });
@@ -209,7 +181,6 @@ class TaskDownPopup {
     });
 
     this.useLocalModeBtn?.addEventListener('click', () => {
-      console.log('useLocalModeBtn clicked - showing add task form for local mode');
       this.showAddTaskForm();
     });
 
@@ -237,18 +208,15 @@ class TaskDownPopup {
     // Listen for changes in chrome.storage from web app
     chrome.storage.onChanged.addListener((changes, areaName) => {
       if ((areaName === 'sync' || areaName === 'local') && changes['taskdown_local_tasks']) {
-        console.log('🔔 Detected storage change from web app:', changes['taskdown_local_tasks'].newValue);
 
         // Update local localStorage with the new data
         try {
           const newTasksJson = changes['taskdown_local_tasks'].newValue;
           if (newTasksJson) {
             localStorage.setItem('taskdown_local_tasks', newTasksJson);
-            console.log('✓ Popup localStorage updated from chrome.storage');
 
             // Reload tasks in popup to show updated data
             if (this.tasksContainerEl && !this.tasksContainerEl.classList.contains('hidden')) {
-              console.log('🔄 Refreshing tasks in popup due to web app changes');
               this.loadTasks();
             }
           }
@@ -488,7 +456,6 @@ class TaskDownPopup {
       // Remove from local array and re-render
       this.tasks = this.tasks.filter(t => t.id !== taskId);
       this.renderTasks();
-      console.log('✓ Task deleted:', taskId);
 
     } catch (error) {
       console.error('Failed to delete task:', error);
@@ -565,16 +532,10 @@ class TaskDownPopup {
 
   // UI State Management
   showLoading() {
-    console.log('showLoading() called');
-    console.log('loadingEl:', this.loadingEl);
 
     if (this.loadingEl) {
-      console.log('Hiding all elements...');
       this.hideAll();
-      console.log('Removing hidden class from loading element');
       this.loadingEl.classList.remove('hidden');
-      console.log('Loading element shown, classList:', this.loadingEl.className);
-      console.log('Loading element display:', window.getComputedStyle(this.loadingEl).display);
     } else {
       console.error('Loading element not found! Creating fallback...');
       // Fallback: create loading message directly
@@ -583,40 +544,26 @@ class TaskDownPopup {
   }
 
   showAuthRequired() {
-    console.log('showAuthRequired() called');
-    console.log('authRequiredEl before hideAll:', !!this.authRequiredEl);
 
     // First hide everything
     this.hideAll();
 
-    console.log('authRequiredEl after hideAll:', !!this.authRequiredEl);
 
     if (this.authRequiredEl) {
       // Make absolutely sure loading is hidden
       if (this.loadingEl && this.loadingEl.classList.contains('hidden') === false) {
-        console.log('⚠️ Loading element is still visible! Adding hidden class');
         this.loadingEl.classList.add('hidden');
       }
 
-      console.log('Removing hidden class from authRequiredEl');
       this.authRequiredEl.classList.remove('hidden');
-      console.log('authRequiredEl classes after remove:', this.authRequiredEl.className);
-      console.log('authRequiredEl display style:', window.getComputedStyle(this.authRequiredEl).display);
-      console.log('authRequiredEl visibility:', window.getComputedStyle(this.authRequiredEl).visibility);
-      console.log('authRequiredEl offsetHeight:', this.authRequiredEl.offsetHeight);
-      console.log('authRequiredEl offsetWidth:', this.authRequiredEl.offsetWidth);
-      console.log('authRequiredEl HTML:', this.authRequiredEl.innerHTML.substring(0, 100));
 
       // Extra verification
       setTimeout(() => {
-        console.log('✓ After 100ms - authRequiredEl display:', window.getComputedStyle(this.authRequiredEl).display);
-        console.log('✓ After 100ms - loadingEl display:', window.getComputedStyle(this.loadingEl).display);
       }, 100);
     } else {
       console.error('authRequiredEl not found!');
       // Try to find it manually
       const el = document.getElementById('auth-required');
-      console.log('Manual search for auth-required:', !!el);
       if (el) {
         el.classList.remove('hidden');
       }
@@ -624,7 +571,6 @@ class TaskDownPopup {
   }
 
   showLocalTasksInfo(count) {
-    console.log('showLocalTasksInfo() called with count:', count);
     this.hideAll();
     const countEl = document.getElementById('local-tasks-count');
     if (countEl) {
@@ -638,7 +584,6 @@ class TaskDownPopup {
   }
 
   showLocalTasksWithBanner(count) {
-    console.log('showLocalTasksWithBanner() called with count:', count);
     this.hideAll();
 
     // Show tasks container
@@ -651,7 +596,6 @@ class TaskDownPopup {
   }
 
   showTasksContainer() {
-    console.log('showTasksContainer() called');
     this.hideAll();
     if (this.tasksContainerEl) {
       this.tasksContainerEl.classList.remove('hidden');
@@ -661,7 +605,6 @@ class TaskDownPopup {
   }
 
   showEmptyState() {
-    console.log('showEmptyState() called');
     this.hideAll();
     if (this.tasksListEl) this.tasksListEl.innerHTML = '';
     if (this.emptyStateEl) this.emptyStateEl.classList.remove('hidden');
@@ -681,34 +624,26 @@ class TaskDownPopup {
   }
 
   hideAll() {
-    console.log('hideAll() called - hiding all screens');
     if (this.loadingEl) {
       this.loadingEl.classList.add('hidden');
-      console.log('  Loading hidden');
     }
     if (this.authRequiredEl) {
       this.authRequiredEl.classList.add('hidden');
-      console.log('  AuthRequired hidden');
     }
     if (this.localTasksInfoEl) {
       this.localTasksInfoEl.classList.add('hidden');
-      console.log('  LocalTasksInfo hidden');
     }
     if (this.tasksContainerEl) {
       this.tasksContainerEl.classList.add('hidden');
-      console.log('  TasksContainer hidden');
     }
     if (this.addTaskFormEl) {
       this.addTaskFormEl.classList.add('hidden');
-      console.log('  AddTaskForm hidden');
     }
     if (this.emptyStateEl) {
       this.emptyStateEl.classList.add('hidden');
-      console.log('  EmptyState hidden');
     }
     if (this.errorStateEl) {
       this.errorStateEl.classList.add('hidden');
-      console.log('  ErrorState hidden');
     }
   }
 
@@ -747,13 +682,10 @@ class TaskDownPopup {
           const tasksArr = tasks;
           chrome.runtime.sendMessage({ action: 'saveTasks', tasks: tasksArr, origin: 'extension' }, (resp) => {
             if (chrome.runtime.lastError) {
-              console.warn('Warning sending tasks to background:', chrome.runtime.lastError.message);
             } else {
-              console.log('✓ Background persisted updated tasks (updateLocalTask)');
             }
           });
         } catch (syncError) {
-          console.warn('Could not send message to background to persist tasks:', syncError);
         }
         try { this.updateAddButtonState().catch(() => { }); } catch (e) { }
       }
@@ -775,13 +707,10 @@ class TaskDownPopup {
       try {
         chrome.runtime.sendMessage({ action: 'saveTasks', tasks: filteredTasks, origin: 'extension' }, (resp) => {
           if (chrome.runtime.lastError) {
-            console.warn('Warning sending tasks to background:', chrome.runtime.lastError.message);
           } else {
-            console.log('✓ Background persisted tasks after deletion (deleteLocalTask)');
           }
         });
       } catch (syncError) {
-        console.warn('Could not send message to background to persist tasks:', syncError);
       }
       try { this.updateAddButtonState().catch(() => { }); } catch (e) { }
     } catch (error) {
@@ -828,7 +757,6 @@ class TaskDownPopup {
 
   // Add task form methods
   async showAddTaskForm() {
-    console.log('showAddTaskForm() called');
 
     // Check task limit for unauthenticated users
     if (!this.isAuthenticated) {
@@ -849,7 +777,6 @@ class TaskDownPopup {
   }
 
   hideAddTaskForm() {
-    console.log('hideAddTaskForm() called');
     if (this.addTaskFormEl) {
       this.addTaskFormEl.classList.add('hidden');
     }
@@ -877,7 +804,6 @@ class TaskDownPopup {
 
   async handleTaskSubmit(event) {
     event.preventDefault();
-    console.log('handleTaskSubmit() called');
 
     const title = this.taskTitleInput?.value?.trim();
     const description = this.taskDescriptionInput?.value?.trim();
@@ -921,7 +847,6 @@ class TaskDownPopup {
         updated_at: new Date().toISOString()
       };
 
-      console.log('Creating new task:', newTask);
 
       // Save to localStorage
       this.saveLocalTask(newTask);
@@ -953,16 +878,12 @@ class TaskDownPopup {
         const tasksArr = tasks;
         chrome.runtime.sendMessage({ action: 'saveTasks', tasks: tasksArr, origin: 'extension' }, (resp) => {
           if (chrome.runtime.lastError) {
-            console.warn('Warning sending new task to background:', chrome.runtime.lastError.message);
           } else {
-            console.log('✓ Background persisted new task (saveLocalTask)');
           }
         });
       } catch (syncError) {
-        console.warn('Could not send message to background to persist new task:', syncError);
       }
 
-      console.log('Task saved to localStorage:', task);
       try { this.updateAddButtonState().catch(() => { }); } catch (e) { }
     } catch (error) {
       console.error('Error saving local task:', error);
@@ -980,12 +901,9 @@ class TaskDownPopup {
 
 // Initialize popup when DOM is loaded
 if (document.readyState === 'loading') {
-  console.log('DOM still loading, waiting for DOMContentLoaded event...');
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOMContentLoaded fired, initializing TaskDownPopup');
     new TaskDownPopup();
   });
 } else {
-  console.log('DOM already loaded, initializing TaskDownPopup immediately');
   new TaskDownPopup();
 }

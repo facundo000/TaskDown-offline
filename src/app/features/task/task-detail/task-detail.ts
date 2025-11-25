@@ -236,7 +236,6 @@ export class TaskDetailComponent implements OnInit {
 
   editTask() {
     // TODO: Implement edit functionality
-    console.log('Edit task:', this.task());
   }
 
   async decrementTask() {

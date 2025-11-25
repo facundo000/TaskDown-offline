@@ -15,7 +15,6 @@ export class ToastService {
     const id = this.generateId();
     const toastWithId: ToastMessage = { ...toast, id };
 
-    console.log('ToastService.showToast called:', toastWithId);
     this._toasts.update(toasts => [...toasts, toastWithId]);
 
     // Auto-dismiss if duration is specified
@@ -29,7 +28,6 @@ export class ToastService {
   }
 
   dismissToast(toastId: string) {
-    console.log('ToastService.dismissToast called:', toastId);
     this._toasts.update(toasts => toasts.filter(toast => toast.id !== toastId));
   }
 

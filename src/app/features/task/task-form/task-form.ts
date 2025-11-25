@@ -189,7 +189,6 @@ export class TaskFormComponent {
       const count = Array.isArray(arr) ? arr.length : 0;
       this.atLimit = count >= (this.localTaskLimit || 200);
     } catch (err) {
-      console.warn('Could not read local tasks to compute limit state:', err);
       this.atLimit = false;
     }
   }

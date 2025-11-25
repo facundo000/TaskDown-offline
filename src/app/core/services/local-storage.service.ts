@@ -34,19 +34,9 @@ export class LocalStorageService {
               const marker = localStorage.getItem('__TASKDOWN_EXTENSION_CHANGE');
               const isFromExtension = (msg && msg.origin === 'extension') || (msg && msg.__changeId && marker === msg.__changeId);
 
-            console.log('🔔 TASKDOWN_EXTENSION_STORAGE_CHANGED received');
-            console.log('   Full message object:', msg);
-            console.log('   isFromExtension:', isFromExtension);
-            console.log('   Data comparison:', {
-              isFromExtension,
-              payloadIdentical: current === json,
-              currentLength: current.length,
-              newLength: json.length
-            });
 
             // If NOT from extension and data is identical, skip (it's an echo from web)
             if (!isFromExtension && current === json) {
-              console.log('ℹ️ Skipping reminder: data identical and not from extension (web echo)');
               return;
             }
 
@@ -57,7 +47,6 @@ export class LocalStorageService {
             // success toast without action so the user gets confirmation but is
             // not prompted to refresh.
             if (!isFromExtension) {
-              console.log('ℹ️ Change originated from web, showing saved confirmation toast');
               try {
                 this.toastService.showToast({
                   type: 'success',
@@ -66,7 +55,6 @@ export class LocalStorageService {
                   duration: 3000
                 });
               } catch (err) {
-                console.debug('ToastService not available to show saved confirmation:', err);
               }
               return;
             }
@@ -86,7 +74,6 @@ export class LocalStorageService {
                 }
               });
             } catch (err) {
-              console.debug('ToastService not available to show extension reminder:', err);
             }
             // Clear the last-extension-change marker so subsequent identical
             // storageChanged notifications won't be treated as new extension-origin
@@ -96,14 +83,12 @@ export class LocalStorageService {
             } catch (err) {
               // ignore
             }
-            console.log('✓ Applied TASKDOWN_EXTENSION_STORAGE_CHANGED in page localStorage');
           } catch (err) {
             console.error('Error handling TASKDOWN_EXTENSION_STORAGE_CHANGED message:', err);
           }
         }
       });
     } catch (err) {
-      console.debug('Could not register window.message listener in LocalStorageService:', err);
     }
   }
 
@@ -136,11 +121,8 @@ export class LocalStorageService {
       // Notify the content script via window.postMessage (most reliable from page context)
       // The content script will then forward to the background
       try {
-        console.log('📨 Notifying content script about task changes...');
         window.postMessage({ type: 'TASKDOWN_SAVE_TASKS', tasks }, '*');
-        console.log('✓ Dispatched window.postMessage TASKDOWN_SAVE_TASKS to content script');
       } catch (err) {
-        console.warn('⚠️ Could not post message to content script:', err);
       }
       
       // Also try direct chrome.runtime.sendMessage as fallback (if available)
@@ -151,17 +133,13 @@ export class LocalStorageService {
             tasks: tasks
           }, (response: any) => {
             if (chrome.runtime.lastError) {
-              console.debug('Direct runtime message failed (expected)');
             } else {
-              console.log('✓ Tasks sent to extension via runtime.sendMessage');
             }
           });
         }
       } catch (error) {
-        console.debug('Chrome runtime.sendMessage not available');
       }
       
-      console.log('✓ Tasks saved to localStorage');
     } catch (error) {
       console.error('Error saving local tasks:', error);
     }
@@ -208,16 +186,13 @@ export class LocalStorageService {
         // Save to both sync and local storage
         chrome.storage.sync.set({ 'taskdown_local_tasks': tasksJson }, () => {
           if (chrome.runtime.lastError) {
-            console.warn('⚠️ Chrome sync storage not available:', chrome.runtime.lastError.message);
             // Fallback to local storage
             chrome.storage.local.set({ 'taskdown_local_tasks': tasksJson });
           } else {
-            console.log('🔄 Web changes synced to extension');
           }
         });
       }
     } catch (error) {
-      console.debug('Chrome storage not available (normal in non-extension context)');
     }
   }
 }

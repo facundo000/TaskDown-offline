@@ -69,21 +69,16 @@ export class SyncButtonComponent {
     // Append to container - ensure it's visible
     this.container.appendChild(this.element);
     
-    console.log('🔄 Sync button created and appended to DOM');
     
     // Verify button is visible
     setTimeout(() => {
       const computedStyle = window.getComputedStyle(this.element!);
-      console.log('Sync button display:', computedStyle.display);
-      console.log('Sync button visibility:', computedStyle.visibility);
-      console.log('Sync button z-index:', computedStyle.zIndex);
     }, 100);
   }
 
   sync(): void {
     if (this.isLoading || !this.element) return;
 
-    console.log('🔄 Refresh button clicked - reloading page');
     this.isLoading = true;
 
     // Show loading state
@@ -125,7 +120,6 @@ export class SyncButtonComponent {
       }
     }, 1500);
     
-    console.log('✓ Sync completed');
   }
 
   remove(): void {

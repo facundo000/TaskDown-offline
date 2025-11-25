@@ -5,7 +5,6 @@
 if (window.location.hostname.includes('your-taskdown-app.com') ||
   window.location.hostname === 'localhost') {
 
-  console.log('TaskDown extension content script loaded');
 
   // Listen for messages from the web app
   window.addEventListener('message', (event) => {

@@ -132,7 +132,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       if (!event || event.source !== window || !event.data) return;
       const msg = event.data;
       if (msg && msg.type === 'TASKDOWN_REQUEST_REFRESH') {
-        console.log('📣 Received TASKDOWN_REQUEST_REFRESH from toast, reloading tasks in-page');
         this.loadTasks();
         // Dismiss the extension reminder toast(s) that included the action button
         try {
@@ -143,7 +142,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
             }
           });
         } catch (err) {
-          console.debug('Could not dismiss extension reminder toasts:', err);
         }
 
         this.toastService.showSuccess('Actualizado', 'Se han cargado los cambios desde la extensión');
@@ -162,7 +160,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     try {
       window.addEventListener('message', this.refreshMessageHandler);
     } catch (err) {
-      console.debug('Could not attach window message listener for refresh requests:', err);
     }
   }
 
