@@ -4,8 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build && npm run postbuild",
-    "postbuild": "npm run copy-extension-files",
+    "build": "ng build",
     "copy-extension-files": "xcopy extension dist\\extension /E /I /Y",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
