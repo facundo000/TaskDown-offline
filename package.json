@@ -6,7 +6,7 @@
     "start": "ng serve",
     "build": "ng build && npm run postbuild",
     "postbuild": "npm run copy-extension-files",
-    "copy-extension-files": "mkdir dist\\extension 2>nul && copy extension\\config.js dist\\extension\\ && copy extension\\manifest.json dist\\extension\\ && copy extension\\background.js dist\\extension\\ && copy extension\\content.js dist\\extension\\ && copy extension\\content.sync.js dist\\extension\\ && xcopy extension\\popup dist\\extension\\popup /E /I /Y && xcopy extension\\icons dist\\extension\\icons /E /I /Y 2>nul || echo Icons folder not found, skipping",
+    "copy-extension-files": "xcopy extension dist\\extension /E /I /Y",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
