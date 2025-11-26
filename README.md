@@ -95,3 +95,10 @@ npm run build
 - Excalidraw: https://excalidraw.com
 - Dribbble (task managers): https://dribbble.com/search/task-tracker
 - Figma Community (minimalista)
+
+
+## Puntos a tener en cuenta sobre el proyecto
+
+- El proyecto por ahora solo se puede usar offline
+- En la carpeta `extension\content.js` se puede cambiar el dominio de la web a la que apuntaría la extensión
+- Por el momento solo se puede usar la extensión en la misma ventana 
