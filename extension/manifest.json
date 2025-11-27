@@ -2,12 +2,13 @@
   "manifest_version": 3,
   "name": "TaskDown",
   "version": "1.0.0",
-  "description": "Gestión eficiente de tareas con contador descendente",
+  "description": "Gestiona tus tareas con contador descendente. Los datos se almacenan localmente. Útil para fijar un meta de tareas diarias.",
   "permissions": [
     "storage",
     "activeTab",
     "contextMenus"
   ],
+  "homepage_url": "https://taskdown-offline.vercel.app/privacy",
   "action": {
     "default_popup": "popup/popup.html",
     "default_title": "TaskDown - Gestiona tus tareas",
@@ -24,10 +25,10 @@
   "content_scripts": [
     {
       "matches": [
-        "http://localhost:4200/*",
-        "http://127.0.0.1:4200/*"
+        "https://taskdown-offline.vercel.app/*"
       ],
       "js": [
+        "config.js",
         "content.js",
         "content.sync.js"
       ],

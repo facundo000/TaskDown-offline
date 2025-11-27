@@ -11,6 +11,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
   },
   {
+    path: 'privacy',
+    loadComponent: () => import('./features/privacy/privacy.component').then(m => m.PrivacyComponent),
+  },
+  {
     path: 'task/:id',
     loadComponent: () => import('./features/task/task-detail/task-detail').then(m => m.TaskDetailComponent),
   },

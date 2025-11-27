@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TaskService } from '../../core/services/task.service';
 import { LocalStorageService } from '../../core/services/local-storage.service';
 import { Task } from '../../core/models/task.model';
@@ -16,6 +16,7 @@ import { ToastService } from '../../core/services/toast.service';
   selector: 'app-dashboard',
   imports: [
     CommonModule,
+    RouterLink,
     HeaderComponent,
     TaskCardComponent,
     TaskFormComponent,
@@ -81,6 +82,17 @@ import { ToastService } from '../../core/services/toast.service';
             </div>
           </ng-template>
         </div>
+
+        <!-- Footer -->
+        <footer class="mt-8 pt-6 border-t border-gray-200">
+          <div class="text-center text-sm text-gray-500">
+            <a routerLink="/privacy" class="text-indigo-600 hover:text-indigo-800 transition-colors duration-200">
+              Política de Privacidad
+            </a>
+            <span class="mx-2">•</span>
+            <span>TaskDown © {{ currentYear }}</span>
+          </div>
+        </footer>
       </main>
 
       <!-- Task Form Modal -->
@@ -126,6 +138,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   localTasksCount = signal(0);
   // Expose configured local task limit to template
   localTaskLimit = environment.localTaskLimit || 200;
+  currentYear = new Date().getFullYear();
   private unsubscribeRealtime: (() => void) | null = null;
   private refreshMessageHandler = (event: MessageEvent) => {
     try {

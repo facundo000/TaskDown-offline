@@ -2,7 +2,7 @@
 // Runs on web pages to provide integration with the TaskDown web app
 
 // Only run on TaskDown app pages
-if (window.location.hostname.includes('your-taskdown-app.com') ||
+if (window.location.hostname.includes('taskdown-offline.vercel.app') ||
   window.location.hostname === 'localhost') {
 
 

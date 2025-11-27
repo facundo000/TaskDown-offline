@@ -1,6 +1,9 @@
 // TaskDown Extension Background Script
 // Handles background tasks and service worker functionality
 
+// Load configuration
+importScripts('config.js');
+
 
 // Initialize extension
 chrome.runtime.onInstalled.addListener(() => {
@@ -21,20 +24,14 @@ chrome.runtime.onInstalled.addListener(() => {
     chrome.storage.sync.get(['taskdown_local_limit'], (res) => {
       const val = res && res.taskdown_local_limit;
       // If limit is set to 200 (old default), migrate it to 20
-      if (val === 200) {
-        chrome.storage.sync.set({ taskdown_local_limit: 20 }, () => {
-        });
-        return;
-      }
-
       if (typeof val === 'number' && isFinite(val) && val > 0) {
         return;
       }
       // Set default limit to 20 if not present
-      chrome.storage.sync.set({ taskdown_local_limit: 20 }, () => {
+      chrome.storage.sync.set({ taskdown_local_limit: 35 }, () => {
         if (chrome.runtime.lastError) {
           // Try local as fallback
-          chrome.storage.local.set({ taskdown_local_limit: 20 }, () => {
+          chrome.storage.local.set({ taskdown_local_limit: 35 }, () => {
           });
         } else {
         }
@@ -48,7 +45,7 @@ chrome.runtime.onInstalled.addListener(() => {
 if (chrome.contextMenus && chrome.contextMenus.onClicked) {
   chrome.contextMenus.onClicked.addListener((info, tab) => {
     if (info.menuItemId === 'open-taskdown') {
-      chrome.tabs.create({ url: 'https://your-taskdown-app.com' });
+      chrome.tabs.create({ url: EXTENSION_CONFIG.appUrl });
     }
   });
 }
@@ -61,7 +58,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // Get all tabs and send message to matching ones
     chrome.tabs.query({}, (tabs) => {
       tabs.forEach(tab => {
-        if (tab.url && (tab.url.includes('localhost') || tab.url.includes('your-taskdown-app.com'))) {
+        if (tab.url && (tab.url.includes('localhost') || tab.url.includes('taskdown-offline.vercel.app'))) {
           chrome.tabs.sendMessage(tab.id, { action: 'syncLocalTasks' }).catch(() => {
             // Tab might not have content script loaded, ignore error
           });
@@ -191,7 +188,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
         const origin = typeof resolvedOrigin !== 'undefined' ? resolvedOrigin : undefined;
         chrome.tabs.query({}, (tabs) => {
           tabs.forEach(tab => {
-            if (tab.url && (tab.url.includes('localhost') || tab.url.includes('your-taskdown-app.com'))) {
+            if (tab.url && (tab.url.includes('localhost') || tab.url.includes('taskdown-offline.vercel.app'))) {
               chrome.tabs.sendMessage(tab.id, {
                 action: 'storageChanged',
                 data: newValue,
@@ -206,7 +203,3 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     }
   }
 });
-
-// Basic keep-alive to prevent service worker from being terminated
-setInterval(() => {
-}, 300000); // Every 5 minutes
