@@ -136,13 +136,14 @@ import { ToastService } from '../../../core/services/toast.service';
                     </button>
 
                     <div class="space-y-2">
+                      <label class="block text-sm font-bold text-gray-700">Saltar a valor específico</label>
                       <input
                         type="number"
                         [(ngModel)]="customDecrementValue"
                         [disabled]="isLoading()"
                         [max]="task()!.current_count - 1"
                         min="0"
-                        placeholder="Decrementar a valor (ej: 5)"
+                        placeholder="Ej: 5 (menor que el actual)"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                       />
                       <button
@@ -157,15 +158,17 @@ import { ToastService } from '../../../core/services/toast.service';
                         }
                         <span class="ml-2">Decrementar a valor</span>
                       </button>
+                      <p class="text-xs text-gray-500">Reduce el contador directamente al valor indicado. Si llegas a 0, la tarea se marcará como completada.</p>
                     </div>
 
                     <div class="space-y-2">
+                      <label class="block text-sm font-bold text-gray-700">Restablecer a valor personalizado</label>
                       <input
                         type="number"
                         [(ngModel)]="customResetValue"
                         [disabled]="isLoading()"
                         min="0"
-                        placeholder="Valor personalizado"
+                        placeholder="Ej: 10 (cualquier valor ≥ 0)"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                       />
                       <button
@@ -180,6 +183,7 @@ import { ToastService } from '../../../core/services/toast.service';
                         }
                         <span class="ml-2">Restablecer a valor</span>
                       </button>
+                      <p class="text-xs text-gray-500">Cambia el contador al valor que indiques. No se marcará como completada aunque pongas 0.</p>
                     </div>
 
                     <button

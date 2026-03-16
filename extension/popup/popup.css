@@ -505,6 +505,13 @@ body {
   min-height: 60px;
 }
 
+.form-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #888;
+}
+
 .form-actions {
   display: flex;
   gap: 8px;
