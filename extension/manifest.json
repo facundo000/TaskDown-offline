@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "TaskDown",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Gestiona tus tareas con contador descendente. Los datos se almacenan localmente. Útil para fijar un meta de tareas diarias.",
   "permissions": [
     "storage",

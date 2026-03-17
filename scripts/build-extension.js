@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const archiver = require('archiver');
 
 const ROOT = path.join(__dirname, '..');
 const manifestPath = path.join(ROOT, 'extension', 'manifest.json');
@@ -23,15 +23,15 @@ if (fs.existsSync(zipPath)) {
   fs.unlinkSync(zipPath);
 }
 
-try {
-  // PowerShell (Windows)
-  execSync(
-    `powershell -Command "Compress-Archive -Path '${extensionDir}\\*' -DestinationPath '${zipPath}'"`,
-    { stdio: 'inherit' }
-  );
-} catch {
-  // Fallback: zip CLI (MINGW / Unix)
-  execSync(`zip -r "${zipPath}" .`, { cwd: extensionDir, stdio: 'inherit' });
-}
+const output = fs.createWriteStream(zipPath);
+const archive = archiver('zip', { zlib: { level: 9 } });
 
-console.log(`Extension zipped → dist/TaskDown-offline.zip`);
+archive.on('error', (err) => { throw err; });
+
+output.on('close', () => {
+  console.log(`Extension zipped → dist/TaskDown-offline.zip (${archive.pointer()} bytes)`);
+});
+
+archive.pipe(output);
+archive.directory(extensionDir, false);
+archive.finalize();
